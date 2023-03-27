@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Chat</title>
+	<style>
+		.chat-container {
+			max-width: 600px;
+			margin: auto;
+			padding: 20px;
+			border: 1px solid #ddd;
+			border-radius: 10px;
+			box-shadow: 0px 0px 10px #ddd;
+			font-family: Arial, sans-serif;
+		}
+
+		h1 {
+			font-size: 24px;
+			margin-top: 0px;
+		}
+
+		.chat-bubble {
+			margin-bottom: 10px;
+			padding: 10px;
+			border-radius: 10px;
+			background-color: #f1f1f1;
+			clear: both;
+			overflow-wrap: break-word;
+		}
+
+		.user-bubble {
+			float: right;
+			background-color: #4CAF50;
+			color: white;
+		}
+
+		.bot-bubble {
+			float: left;
+			background-color: #ddd;
+		}
+
+		.record-button {
+			display: block;
+			margin-bottom: 10px;
+			background-color: #4CAF50;
+			color: white;
+			border: none;
+			border-radius: 5px;
+			padding: 10px;
+			font-size: 16px;
+			cursor: pointer;
+		}
+	</style>
+</head>
+<body>
+	<div class="chat-container">
+		<h1>Chat</h1>
+		{% for message in messages %}
+			<div class="chat-bubble {% if message.type == 'user' %}user-bubble{% else %}bot-bubble{% endif %}">
+				{{ message.text }}
+			</div>
+		{% endfor %}
+		<button class="record-button" onclick="startRecording()">Record</button>
+		<form id="chat-form" action="/chat" method="post" enctype="multipart/form-data">
+			<input type="hidden" id="audio-data" name="audio-data">
+			<input type="submit" value="Send">
+		</form>
+	</div>
+	<script>
+		function startRecording() {
+			const recognition = new webkitSpeechRecognition();
+			recognition.continuous = false;
+			recognition.interimResults = false;
+			recognition.lang = 'pt-BR';
+			recognition.maxAlternatives = 1;
+			recognition.start();
+			recognition.onresult = function(event) {
+				const audioData = event.results[0][0].transcript;
+				document.getElementById('audio-data').value = audioData;
+				document.getElementById('chat-form').submit();
+			}
+			setTimeout(() => recognition.stop(), 30000);
+		}
+	</script>
+</body>
+</html>
